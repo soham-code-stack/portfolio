@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Soham Bishnu — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;
+  --gold-light:#E8C97A;
+  --gold-dim:rgba(201,168,76,0.15);
+  --gold-border:rgba(201,168,76,0.3);
+  --bg:#090909;
+  --bg2:#0f0f0f;
+  --bg3:#141414;
+  --text:#F0EBE0;
+  --text-muted:#8A8070;
+  --text-dim:#3A3530;
+  --serif:'Cormorant Garamond',serif;
+  --sans:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;cursor:none}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;line-height:1.6}
+
+/* CURSOR */
+#cursor{position:fixed;width:10px;height:10px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--gold-border);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen}
+body:hover #cursor{opacity:1}
+
+/* CANVAS */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:1}
+
+/* SCROLL PROGRESS */
+#progress-bar{position:fixed;top:0;left:0;height:1px;background:linear-gradient(90deg,var(--gold),var(--gold-light));z-index:1000;transition:width .1s linear}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:1.5rem 3rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(12px);background:rgba(9,9,9,0.6);border-bottom:1px solid rgba(201,168,76,0.08)}
+.nav-logo{font-family:var(--mono);font-size:13px;color:var(--gold);letter-spacing:.15em;opacity:.9}
+.nav-links{display:flex;gap:2.5rem}
+.nav-links a{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;transition:color .3s;font-family:var(--mono)}
+.nav-links a:hover{color:var(--gold)}
+
+/* SECTIONS WRAPPER */
+main{position:relative;z-index:10}
+
+/* SECTION BASE */
+section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:8rem 0}
+
+/* HERO */
+#hero{min-height:100vh;flex-direction:column;justify-content:center;padding:0;overflow:hidden}
+.hero-inner{text-align:center;position:relative;padding:0 2rem}
+.hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.4em;color:var(--gold);text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:fadeUp .8s .3s forwards}
+.hero-name{font-family:var(--serif);font-size:clamp(4rem,10vw,9rem);font-weight:300;line-height:.95;letter-spacing:-.02em;color:var(--text);margin-bottom:1.5rem;opacity:0;animation:fadeUp .9s .5s forwards}
+.hero-name span{color:var(--gold);font-style:italic}
+.hero-tagline{font-family:var(--mono);font-size:clamp(11px,1.5vw,14px);color:var(--text-muted);max-width:520px;margin:0 auto 3rem;line-height:1.9;letter-spacing:.05em;opacity:0;animation:fadeUp .9s .7s forwards}
+.hero-cta{display:inline-flex;align-items:center;gap:.75rem;font-family:var(--mono);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);text-decoration:none;border:1px solid var(--gold-border);padding:.9rem 2rem;transition:all .4s;opacity:0;animation:fadeUp .9s .9s forwards;cursor:none}
+.hero-cta:hover{background:var(--gold-dim);border-color:var(--gold);box-shadow:0 0 30px rgba(201,168,76,0.15)}
+.hero-cta-arrow{transition:transform .3s}
+.hero-cta:hover .hero-cta-arrow{transform:translateX(4px)}
+.hero-scroll{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--text-dim);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:.75rem;opacity:0;animation:fadeUp 1s 1.2s forwards}
+.hero-scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--gold-border),transparent);animation:lineGrow 2s 1.5s ease-in-out infinite}
+.hero-grid-lines{position:absolute;inset:0;pointer-events:none;opacity:.03;background-image:linear-gradient(var(--gold) 1px,transparent 1px),linear-gradient(90deg,var(--gold) 1px,transparent 1px);background-size:80px 80px}
+
+/* SECTION HEADER */
+.section-header{margin-bottom:4rem;position:relative}
+.section-num{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--gold);margin-bottom:.75rem;display:block}
+.section-title{font-family:var(--serif);font-size:clamp(2.5rem,5vw,4.5rem);font-weight:300;line-height:1.1;color:var(--text)}
+.section-title em{color:var(--gold);font-style:italic}
+.section-rule{width:60px;height:1px;background:var(--gold);margin-top:1.5rem;position:relative}
+
+/* CONTAINER */
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 3rem}
+
+/* ABOUT */
+#about .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center}
+.about-text p{font-family:var(--serif);font-size:1.25rem;line-height:1.85;color:#c8bfb0;font-weight:300;margin-bottom:1.5rem}
+.about-text p:first-child{font-size:1.5rem;color:var(--text)}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.stat-card{border:1px solid var(--gold-border);padding:1.75rem;position:relative;overflow:hidden;transition:border-color .3s}
+.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-dim),transparent);opacity:0;transition:opacity .3s}
+.stat-card:hover{border-color:var(--gold)}
+.stat-card:hover::before{opacity:1}
+.stat-num{font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--gold);display:block;line-height:1}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--text-muted);text-transform:uppercase;margin-top:.5rem;display:block}
+
+/* SKILLS */
+#skills{background:linear-gradient(to bottom,var(--bg),var(--bg2))}
+.skills-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.skill-item{padding:1.5rem 1.75rem;border:1px solid rgba(201,168,76,0.12);position:relative;overflow:hidden;transition:all .4s;display:flex;align-items:center;gap:1rem}
+.skill-item::after{content:'';position:absolute;left:0;top:0;height:100%;width:2px;background:var(--gold);transform:scaleY(0);transform-origin:bottom;transition:transform .4s}
+.skill-item:hover{border-color:var(--gold-border);background:var(--gold-dim);transform:translateX(4px)}
+.skill-item:hover::after{transform:scaleY(1)}
+.skill-icon{font-size:1.25rem;flex-shrink:0}
+.skill-name{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--text-muted);transition:color .3s}
+.skill-item:hover .skill-name{color:var(--gold-light)}
+
+/* PROJECTS */
+#projects{background:var(--bg)}
+.projects-list{display:flex;flex-direction:column;gap:2rem}
+.project-card{border:1px solid rgba(201,168,76,0.1);padding:2.5rem;position:relative;overflow:visible;transition:all .5s;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start}
+.project-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.05),transparent);opacity:0;transition:opacity .4s;pointer-events:none}
+.project-card:hover{border-color:var(--gold-border);transform:translateY(-3px);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.project-card:hover::before{opacity:1}
+.project-num{font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--gold);margin-bottom:.75rem;display:block}
+.project-name{font-family:var(--serif);font-size:1.75rem;font-weight:300;color:var(--text);margin-bottom:.75rem;line-height:1.2}
+.project-desc{font-family:var(--mono);font-size:12px;color:var(--text-muted);line-height:1.85;max-width:680px;margin-bottom:1.5rem}
+.project-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:.3rem .8rem;border:1px solid var(--gold-border);color:var(--gold);transition:all .3s}
+.tag:hover{background:var(--gold-dim)}
+.project-link{display:flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--text-dim);text-decoration:none;text-transform:uppercase;transition:color .3s;white-space:nowrap;padding-top:.25rem;position:relative;z-index:2;cursor:pointer}
+.project-link:hover{color:var(--gold)}
+.project-link-arrow{transition:transform .3s}
+.project-link:hover .project-link-arrow{transform:translate(2px,-2px)}
+.project-features{margin-top:1.25rem;display:flex;flex-direction:column;gap:.4rem}
+.project-feature{font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:.5rem}
+.project-feature::before{content:'';width:4px;height:4px;background:var(--gold);border-radius:50%;flex-shrink:0}
+
+/* EDUCATION */
+#education{background:var(--bg2)}
+.education-block{border-left:1px solid var(--gold-border);padding-left:2.5rem;position:relative}
+.education-block::before{content:'';position:absolute;left:-5px;top:0;width:9px;height:9px;background:var(--gold);border-radius:50%}
+.edu-period{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:.75rem}
+.edu-degree{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--text);margin-bottom:.5rem}
+.edu-school{font-family:var(--mono);font-size:13px;color:var(--text-muted);margin-bottom:1rem}
+.edu-detail{font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;gap:.5rem;align-items:center}
+.edu-detail::before{content:'→';color:var(--gold)}
+
+/* CERTIFICATIONS */
+#certifications{background:var(--bg)}
+.certs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.cert-card{padding:2rem;border:1px solid rgba(201,168,76,0.1);position:relative;overflow:hidden;transition:all .4s}
+.cert-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .4s}
+.cert-card:hover{border-color:var(--gold-border);transform:translateY(-4px)}
+.cert-card:hover::after{opacity:1}
+.cert-issuer{font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--gold);margin-bottom:.75rem;text-transform:uppercase}
+.cert-name{font-family:var(--serif);font-size:1.1rem;font-weight:300;color:var(--text);line-height:1.4}
+.cert-year{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:.75rem}
+.cert-badge{position:absolute;top:1.25rem;right:1.25rem;width:8px;height:8px;background:var(--gold);border-radius:50%}
+
+/* CONTACT */
+#contact{background:linear-gradient(to bottom,var(--bg),var(--bg2))}
+.contact-inner{text-align:center;max-width:600px;margin:0 auto}
+.contact-big{font-family:var(--serif);font-size:clamp(3rem,7vw,6rem);font-weight:300;line-height:1;color:var(--text);margin-bottom:2rem}
+.contact-big em{color:var(--gold);font-style:italic}
+.contact-sub{font-family:var(--mono);font-size:12px;color:var(--text-muted);letter-spacing:.1em;margin-bottom:3rem;line-height:1.9}
+.contact-links{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.contact-link{display:flex;flex-direction:column;align-items:center;gap:.5rem;text-decoration:none;transition:transform .3s}
+.contact-link:hover{transform:translateY(-4px)}
+.contact-link-icon{width:48px;height:48px;border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--gold);transition:all .3s}
+.contact-link:hover .contact-link-icon{background:var(--gold-dim);border-color:var(--gold)}
+.contact-link-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--text-dim);text-transform:uppercase}
+
+/* FOOTER */
+footer{text-align:center;padding:2rem;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--text-dim);border-top:1px solid rgba(201,168,76,0.06);position:relative;z-index:10}
+
+/* REVEAL ANIMATION */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+.reveal-delay-5{transition-delay:.5s}
+
+/* KEYFRAMES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes lineGrow{0%,100%{opacity:.3;transform:scaleY(.5)}50%{opacity:1;transform:scaleY(1)}}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:1.25rem 1.5rem}
+  .nav-links{gap:1.5rem}
+  .container{padding:0 1.5rem}
+  #about .about-grid{grid-template-columns:1fr;gap:3rem}
+  .skills-grid{grid-template-columns:1fr 1fr}
+  .certs-grid{grid-template-columns:1fr}
+  .project-card{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Progress bar -->
+<div id="progress-bar"></div>
+
+<!-- Particle canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SB — Portfolio</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Available for opportunities</div>
+    <h1 class="hero-name">Soham<br/><span>Bishnu</span></h1>
+    <p class="hero-tagline">CSE Student · Passionate about AI, Software Engineering<br/>& Building Smart Software with Full-Stack Technologies</p>
+    <a href="#projects" class="hero-cta">View My Work <span class="hero-cta-arrow">→</span></a>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="section-header">
+          <span class="section-num">About</span>
+          <h2 class="section-title">Crafting code<br/>with <em>purpose</em></h2>
+          <div class="section-rule"></div>
+        </div>
+        <div class="about-text">
+          <p>I'm Soham, a Computer Science & Engineering undergraduate driven by curiosity and the desire to build things that actually matter.</p>
+          <p>My focus lives at the intersection of artificial intelligence, full-stack development, and elegant problem-solving — whether that's building RAG-powered legal assistants or architecting scalable web systems.</p>
+          <p>I believe the best software is invisible — it just works, beautifully.</p>
+        </div>
+      </div>
+      <div class="about-stats reveal reveal-delay-2">
+        <div class="stat-card">
+          <span class="stat-num">3+</span>
+          <span class="stat-label">Projects Shipped</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">9+</span>
+          <span class="stat-label">Technologies</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">AI</span>
+          <span class="stat-label">Primary Focus</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">Curiosity</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">Skills</span>
+      <h2 class="section-title">Tech I work<br/>with <em>daily</em></h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-item reveal reveal-delay-1"><span class="skill-icon">🐍</span><span class="skill-name">Python</span></div>
+      <div class="skill-item reveal reveal-delay-2"><span class="skill-icon">⚡</span><span class="skill-name">C </span></div>
+      <div class="skill-item reveal reveal-delay-3"><span class="skill-icon">☕</span><span class="skill-name">Java</span></div>
+      <div class="skill-item reveal reveal-delay-1"><span class="skill-icon">🌐</span><span class="skill-name">JavaScript </span></div>
+      <div class="skill-item reveal reveal-delay-2"><span class="skill-icon">⚛️</span><span class="skill-name">React </span></div>
+      <div class="skill-item reveal reveal-delay-3"><span class="skill-icon">🤖</span><span class="skill-name">Machine Learning / AI</span></div>
+      <div class="skill-item reveal reveal-delay-1"><span class="skill-icon">🗄️</span><span class="skill-name">SQL</span></div>
+      <div class="skill-item reveal reveal-delay-2"><span class="skill-icon">🎯</span><span class="skill-name">DSA / Competitive Programming</span></div>
+      <div class="skill-item reveal reveal-delay-3"><span class="skill-icon">🎨</span><span class="skill-name">HTML & CSS</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">Projects</span>
+      <h2 class="section-title">Some Top Projects I've<br/><em>built </em></h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="projects-list">
+
+      <!-- Project 1 -->
+      <div class="project-card reveal">
+        <div>
+          <span class="project-num">001</span>
+          <h3 class="project-name">AI Legal Query System</h3>
+          <p class="project-desc">A RAG-based legal assistant that answers natural language queries by retrieving relevant Indian legal provisions, IPC sections, constitutional rights, and case references from a curated vector knowledge base — delivering context-aware legal responses through a conversational interface.</p>
+          <div class="project-features">
+            <div class="project-feature">Semantic search over vector embeddings</div>
+            <div class="project-feature">IPC sections & constitutional provision retrieval</div>
+            <div class="project-feature">Context-aware LLM response generation</div>
+          </div>
+          <div class="project-tags" style="margin-top:1.5rem">
+            <span class="tag">Python</span>
+            <span class="tag">RAG</span>
+            <span class="tag">Vector DB</span>
+            <span class="tag">NLP</span>
+            <span class="tag">Prompt Engineering</span>
+          </div>
+        </div>
+        <a href="https://github.com/soham-code-stack/AI-Legal-Query-System" target="_blank" class="project-link">GitHub <span class="project-link-arrow">↗</span></a>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card reveal reveal-delay-1">
+        <div>
+          <span class="project-num">002</span>
+          <h3 class="project-name">Myntra Clone</h3>
+          <p class="project-desc">A fully responsive frontend clone of the Myntra e-commerce platform — featuring product browsing, search, filtering, wishlist management, cart operations, and a checkout simulation, all powered by vanilla JavaScript with client-side state persistence.</p>
+          <div class="project-features">
+            <div class="project-feature">Product catalog with search & filter</div>
+            <div class="project-feature">Cart & wishlist with local storage persistence</div>
+            <div class="project-feature">Mobile-first responsive design</div>
+          </div>
+          <div class="project-tags" style="margin-top:1.5rem">
+            <span class="tag">HTML5</span>
+            <span class="tag">CSS3</span>
+            <span class="tag">JavaScript ES6</span>
+            <span class="tag">Local Storage</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;align-items:flex-end">
+          <a href="https://github.com/soham-code-stack/myntra-clone" target="_blank" class="project-link">GitHub <span class="project-link-arrow">↗</span></a>
+          <a href="https://soham-code-stack.github.io/myntra-clone/" target="_blank" class="project-link" style="color:var(--gold);border:1px solid var(--gold-border);padding:.3rem .75rem;font-size:10px">Live Demo <span class="project-link-arrow">↗</span></a>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card reveal reveal-delay-2">
+        <div>
+          <span class="project-num">003</span>
+          <h3 class="project-name">Judiciary Information System</h3>
+          <p class="project-desc">A full-stack court case management system enabling court staff and judges to search records, track case progress, and retrieve judicial information through a centralized interface — improving administrative efficiency and judicial data accessibility.</p>
+          <div class="project-features">
+            <div class="project-feature">Case search, retrieval & status tracking</div>
+            <div class="project-feature">Centralized judge & court information lookup</div>
+            <div class="project-feature">Full CRUD operations with JSON data layer</div>
+          </div>
+          <div class="project-tags" style="margin-top:1.5rem">
+            <span class="tag">Python</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag">HTML/CSS</span>
+            <span class="tag">JSON</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;align-items:flex-end">
+          <a href="https://github.com/soham-code-stack/Judiciary-Information-System" target="_blank" class="project-link">GitHub <span class="project-link-arrow">↗</span></a>
+          <a href="https://soham-code-stack.github.io/Judiciary-Information-System/" target="_blank" class="project-link" style="color:var(--gold);border:1px solid var(--gold-border);padding:.3rem .75rem;font-size:10px">Live Demo <span class="project-link-arrow">↗</span></a>
+        </div>
+      </div>
+      <p> check out my github page for other projects that i have made</p>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">Education</span>
+      <h2 class="section-title">Where I'm<br/><em>learning</em></h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="education-block reveal reveal-delay-1">
+      <div class="edu-period">2024 — 2028</div>
+      <div class="edu-degree">B.Tech in Computer Science<br/>& Engineering</div>
+      <div class="edu-school">University of Engineering nd Management · India</div>
+      <div class="edu-detail" style="margin-top:1.5rem">Specialization in Artificial Intelligence & Software Engineering</div>
+      <div class="edu-detail" style="margin-top:.5rem">Active in Competitive Programming & DSA</div>
+      <div class="edu-detail" style="margin-top:.5rem">Building real-world projects alongside coursework</div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="section-num">Certifications</span>
+      <h2 class="section-title">Credentials &<br/><em>recognition</em></h2>
+      <div class="section-rule"></div>
+    </div>
+    <div class="certs-grid">
+      <div class="cert-card reveal reveal-delay-1">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">NPTEL</div>
+        <div class="cert-name">leadership - elite</div>
+        <div class="cert-year">2026</div>
+      </div>
+      <div class="cert-card reveal reveal-delay-2">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">Wadhwani Foundation</div>
+        <div class="cert-name">participation and completion certificate</div>
+        <div class="cert-year">2025</div>
+      </div>
+      <div class="cert-card reveal reveal-delay-3">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">Forage</div>
+        <div class="cert-name">AWS Software Certification</div>
+        <div class="cert-year">2025</div>
+      </div>
+      <div class="cert-card reveal reveal-delay-1">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">NPTEL</div>
+        <div class="cert-name">Python</div>
+        <div class="cert-year">2025</div>
+      </div>
+      <div class="cert-card reveal reveal-delay-2">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">Coursera</div>
+        <div class="cert-name">Convulational Neural Networks</div>
+        <div class="cert-year">2026</div>
+      </div>
+      <div class="cert-card reveal reveal-delay-2">
+        <div class="cert-badge"></div>
+        <div class="cert-issuer">Coursera</div>
+        <div class="cert-name">Google AI Essentials</div>
+        <div class="cert-year">2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="reveal">
+        <div class="section-num" style="text-align:center;margin-bottom:1.5rem">Contact</div>
+        <h2 class="contact-big">Let's build<br/>something <em>great</em></h2>
+        <p class="contact-sub">Open to internships, collaborations, and projects.<br/>If you have an idea or opportunity — I'd love to hear it.</p>
+      </div>
+      <div class="contact-links reveal reveal-delay-2">
+        <a href="mailto:sohambishnu2006@email.com" class="contact-link" style="cursor:none">
+          <div class="contact-link-icon">✉</div>
+          <span class="contact-link-label">Email</span>
+        </a>
+        <a href="https://github.com/soham-code-stack" target="_blank" class="contact-link">
+          <div class="contact-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </div>
+          <span class="contact-link-label">GitHub</span>
+        </a>
+        <a href="https://www.linkedin.com/in/soham-bishnu-526b17317/" target="_blank" class="contact-link">
+          <div class="contact-link-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <span class="contact-link-label">LinkedIn</span>
+        </a>
+        <a href="https://leetcode.com/u/sohams_codes/" target="_blank" class="contact-link">
+          <div class="contact-link-icon">⌨</div>
+          <span class="contact-link-label">LeetCode</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  &copy; 2026 Soham Bishnu — Designed & built with intention
+</footer>
+
+<script>
+/* ---- CURSOR ---- */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let cx = 0, cy = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  cx = e.clientX; cy = e.clientY;
+  cursor.style.left = cx + 'px';
+  cursor.style.top = cy + 'px';
+});
+function animRing() {
+  rx += (cx - rx) * 0.12;
+  ry += (cy - ry) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.skill-item,.project-card,.stat-card,.cert-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '16px';
+    cursor.style.height = '16px';
+    ring.style.width = '52px';
+    ring.style.height = '52px';
+    ring.style.borderColor = 'rgba(201,168,76,0.6)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '10px';
+    cursor.style.height = '10px';
+    ring.style.width = '36px';
+    ring.style.height = '36px';
+    ring.style.borderColor = 'rgba(201,168,76,0.3)';
+  });
+});
+
+/* ---- SCROLL PROGRESS ---- */
+const bar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  bar.style.width = Math.min(pct, 100) + '%';
+});
+
+/* ---- REVEAL ON SCROLL ---- */
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+
+/* ---- PARTICLE CANVAS ---- */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], mouse = { x: -9999, y: -9999 };
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - .5) * .3;
+    this.vy = (Math.random() - .5) * .3;
+    this.r = Math.random() * 1.2 + .3;
+    this.alpha = Math.random() * .35 + .05;
+    this.life = 0;
+    this.maxLife = Math.random() * 400 + 200;
+  }
+  update() {
+    this.life++;
+    if (this.life > this.maxLife) this.reset();
+    const dx = mouse.x - this.x;
+    const dy = mouse.y - this.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 120) {
+      this.vx -= (dx / dist) * .015;
+      this.vy -= (dy / dist) * .015;
+    }
+    this.vx *= .98;
+    this.vy *= .98;
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0) this.x = W;
+    if (this.x > W) this.x = 0;
+    if (this.y < 0) this.y = H;
+    if (this.y > H) this.y = 0;
+  }
+  draw() {
+    const progress = this.life / this.maxLife;
+    const fade = progress < .1 ? progress / .1 : progress > .9 ? (1 - progress) / .1 : 1;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,168,76,${this.alpha * fade})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 80) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(201,168,76,${(.06 * (1 - d / 80))})`;
+        ctx.lineWidth = .5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ---- PARALLAX HERO ---- */
+window.addEventListener('scroll', () => {
+  const hero = document.getElementById('hero');
+  const sy = window.scrollY;
+  hero.style.transform = `translateY(${sy * .3}px)`;
+  hero.style.opacity = Math.max(0, 1 - sy / (window.innerHeight * .75));
+});
+</script>
+</body>
+</html>
